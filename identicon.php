@@ -6,5 +6,5 @@ $generator = new Identicon\Generator($_GET['hash'], $_GET['size']);
 if (!empty($_SERVER['HTTP_IF_NONE_MATCH']) && $generator->getHash() === $_SERVER['HTTP_IF_NONE_MATCH']) {
     header('HTTP/1.1 304 Not Modified');
 } else {
-    $generator->getImagePng();
+    $generator->outputImagePng();
 }

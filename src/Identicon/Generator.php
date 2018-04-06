@@ -16,7 +16,6 @@ class Generator
      */
     private $spriteZ = 128;
 
-
     public function __construct($textInput, $size)
     {
         $this->hash = md5($textInput); // note that we now have an actual hash - don't rely on being passed one!
@@ -29,15 +28,27 @@ class Generator
         $this->size = $size;
     }
 
-    public function getHash() {
+    public function getHash()
+    {
         return $this->hash;
     }
 
-    public function getImagePng()
+    /**
+     * @return resource
+     */
+    public function getImageHandle()
+    {
+        return $this->generateIdenticon();
+    }
+
+    /**
+     * @return void
+     */
+    public function outputImagePng()
     {
         $resized = $this->generateIdenticon();
         header('Content-Type: image/png');
-        header('ETag: "' . $this->getHash() . '"');
+        header('ETag: "'.$this->getHash().'"');
         imagepng($resized);
     }
 
@@ -321,7 +332,7 @@ class Generator
                 break;
         }
         /* apply ratios */
-        for ($i = 0, $iMax = count($shape); $i < $iMax; $i++) {
+        foreach ($shape as $i => $iValue) {
             $shape[$i] *= $this->spriteZ;
         }
         imagefilledpolygon($sprite, $shape, count($shape) / 2, $fg);
@@ -502,7 +513,7 @@ class Generator
                 break;
         }
         /* apply ratios */
-        for ($i = 0, $iMax = count($shape); $i < $iMax; $i++) {
+        foreach ($shape as $i => $iValue) {
             $shape[$i] *= $this->spriteZ;
         }
         if (count($shape) > 0) {
