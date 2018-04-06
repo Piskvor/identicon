@@ -391,8 +391,8 @@ class Generator
                 break;
         }
         /* apply ratios */
-        for ($i = 0; $i < count($shape); $i++) {
-            $shape[$i] = $shape[$i] * $this->spriteZ;
+        for ($i = 0, $iMax = count($shape); $i < $iMax; $i++) {
+            $shape[$i] *= $this->spriteZ;
         }
         imagefilledpolygon($sprite, $shape, count($shape) / 2, $fg);
         /* rotate the sprite */
@@ -572,8 +572,8 @@ class Generator
                 break;
         }
         /* apply ratios */
-        for ($i = 0; $i < count($shape); $i++) {
-            $shape[$i] = $shape[$i] * $this->spriteZ;
+        for ($i = 0, $iMax = count($shape); $i < $iMax; $i++) {
+            $shape[$i] *= $this->spriteZ;
         }
         if (count($shape) > 0) {
             imagefilledpolygon($sprite, $shape, count($shape) / 2, $fg);
