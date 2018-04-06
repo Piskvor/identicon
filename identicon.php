@@ -5,27 +5,29 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Iden
 $generator = new Identicon\Generator();
 
 /* parse hash string */
+$hash = md5($_GET['hash']); // do not assume we're actually getting a sane hash
+$size = $_GET["size"];
 
-$csh=hexdec(substr($_GET["hash"],0,1)); // corner sprite shape
-$ssh=hexdec(substr($_GET["hash"],1,1)); // side sprite shape
-$xsh=hexdec(substr($_GET["hash"],2,1))&7; // center sprite shape
+$csh=hexdec(substr($hash,0,1)); // corner sprite shape
+$ssh=hexdec(substr($hash,1,1)); // side sprite shape
+$xsh=hexdec(substr($hash,2,1))&7; // center sprite shape
 
-$cro=hexdec(substr($_GET["hash"],3,1))&3; // corner sprite rotation
-$sro=hexdec(substr($_GET["hash"],4,1))&3; // side sprite rotation
-$xbg=hexdec(substr($_GET["hash"],5,1))%2; // center sprite background
+$cro=hexdec(substr($hash,3,1))&3; // corner sprite rotation
+$sro=hexdec(substr($hash,4,1))&3; // side sprite rotation
+$xbg=hexdec(substr($hash,5,1))%2; // center sprite background
 
 /* corner sprite foreground color */
-$cfr=hexdec(substr($_GET["hash"],6,2));
-$cfg=hexdec(substr($_GET["hash"],8,2));
-$cfb=hexdec(substr($_GET["hash"],10,2));
+$cfr=hexdec(substr($hash,6,2));
+$cfg=hexdec(substr($hash,8,2));
+$cfb=hexdec(substr($hash,10,2));
 
 /* side sprite foreground color */
-$sfr=hexdec(substr($_GET["hash"],12,2));
-$sfg=hexdec(substr($_GET["hash"],14,2));
-$sfb=hexdec(substr($_GET["hash"],16,2));
+$sfr=hexdec(substr($hash,12,2));
+$sfg=hexdec(substr($hash,14,2));
+$sfb=hexdec(substr($hash,16,2));
 
 /* final angle of rotation */
-$angle=hexdec(substr($_GET["hash"],18,2));
+$angle=hexdec(substr($hash,18,2));
 
 /* size of each sprite */
 $spriteZ=128;
@@ -68,15 +70,16 @@ imagecopy($identicon,$center,$spriteZ,$spriteZ,0,0,$spriteZ,$spriteZ);
 imagecolortransparent($identicon,$bg);
 
 /* create blank image according to specified dimensions */
-$resized=imagecreatetruecolor($_GET["size"],$_GET["size"]);
+$resized=imagecreatetruecolor($size, $size);
 imageantialias($resized,TRUE);
 
 /* assign white as background */
 $bg=imagecolorallocate($resized,255,255,255);
-imagefilledrectangle($resized,0,0,$_GET["size"],$_GET["size"],$bg);
+imagefilledrectangle($resized,0,0, $size, $size,$bg);
 
 /* resize identicon according to specification */
-imagecopyresampled($resized,$identicon,0,0,(imagesx($identicon)-$spriteZ*3)/2,(imagesx($identicon)-$spriteZ*3)/2,$_GET["size"],$_GET["size"],$spriteZ*3,$spriteZ*3);
+imagecopyresampled($resized,$identicon,0,0,(imagesx($identicon)-$spriteZ*3)/2,(imagesx($identicon)-$spriteZ*3)/2, $size,
+    $size,$spriteZ*3,$spriteZ*3);
 
 /* make white transparent */
 imagecolortransparent($resized,$bg);
