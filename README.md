@@ -40,5 +40,5 @@ PHP-Identicons is distributed under the [GPLv3 License](http://www.gnu.org/licen
 ## HISTORY
 
 This code was created by Bong Costa in 2009.
-It has been forked from its [project page on SourceForge](https://sourceforge.net/projects/identicons/) as I intend to enhance it a bit for personnal usage.
+It has been forked from its [project page on SourceForge](https://sourceforge.net/projects/identicons/) as I intend to enhance it a bit for personal usage.
 
