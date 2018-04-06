@@ -6,15 +6,20 @@ $generator = new Identicon\Generator();
 
 /* parse hash string */
 $hash = md5($_GET['hash']); // do not assume we're actually getting a sane hash
-$size = $_GET["size"];
+$size = (int) $_GET['size'];
+if ($size <= 0) { // set sane default size
+    $size = 48;
+} elseif ($size > 1024) { // set maximum size
+    $size = 1024;
+}
 
-$csh=hexdec(substr($hash,0,1)); // corner sprite shape
-$ssh=hexdec(substr($hash,1,1)); // side sprite shape
-$xsh=hexdec(substr($hash,2,1))&7; // center sprite shape
+$csh=hexdec($hash[0]); // corner sprite shape
+$ssh=hexdec($hash[1]); // side sprite shape
+$xsh=hexdec($hash[2])&7; // center sprite shape
 
-$cro=hexdec(substr($hash,3,1))&3; // corner sprite rotation
-$sro=hexdec(substr($hash,4,1))&3; // side sprite rotation
-$xbg=hexdec(substr($hash,5,1))%2; // center sprite background
+$cro=hexdec($hash[3])&3; // corner sprite rotation
+$sro=hexdec($hash[4])&3; // side sprite rotation
+$xbg=hexdec($hash[5])%2; // center sprite background
 
 /* corner sprite foreground color */
 $cfr=hexdec(substr($hash,6,2));
@@ -85,7 +90,5 @@ imagecopyresampled($resized,$identicon,0,0,(imagesx($identicon)-$spriteZ*3)/2,(i
 imagecolortransparent($resized,$bg);
 
 /* and finally, send to standard output */
-header("Content-Type: image/png");
+header('Content-Type: image/png');
 imagepng($resized);
-
-?>
