@@ -29,80 +29,15 @@ class Generator
         $this->size = $size;
     }
 
+    public function getHash() {
+        return $this->hash;
+    }
+
     public function getImagePng()
     {
-
-        $csh = hexdec($this->hash[0]); // corner sprite shape
-        $ssh = hexdec($this->hash[1]); // side sprite shape
-        $xsh = hexdec($this->hash[2]) & 7; // center sprite shape
-
-        $cro = hexdec($this->hash[3]) & 3; // corner sprite rotation
-        $sro = hexdec($this->hash[4]) & 3; // side sprite rotation
-        $xbg = hexdec($this->hash[5]) % 2; // center sprite background
-
-        /* corner sprite foreground color */
-        $cfr = hexdec(substr($this->hash, 6, 2));
-        $cfg = hexdec(substr($this->hash, 8, 2));
-        $cfb = hexdec(substr($this->hash, 10, 2));
-
-        /* side sprite foreground color */
-        $sfr = hexdec(substr($this->hash, 12, 2));
-        $sfg = hexdec(substr($this->hash, 14, 2));
-        $sfb = hexdec(substr($this->hash, 16, 2));
-
-        /* start with blank 3x3 identicon */
-        $identicon = imagecreatetruecolor($this->spriteZ * 3, $this->spriteZ * 3);
-        imageantialias($identicon, true);
-
-        /* assign white as background */
-        $bg = imagecolorallocate($identicon, 255, 255, 255);
-        imagefilledrectangle($identicon, 0, 0, $this->spriteZ, $this->spriteZ, $bg);
-
-        /* generate corner sprites */
-        $corner = $this->getSprite($csh, $cfr, $cfg, $cfb, $cro);
-        imagecopy($identicon, $corner, 0, 0, 0, 0, $this->spriteZ, $this->spriteZ);
-        $corner = imagerotate($corner, 90, $bg);
-        imagecopy($identicon, $corner, 0, $this->spriteZ * 2, 0, 0, $this->spriteZ, $this->spriteZ);
-        $corner = imagerotate($corner, 90, $bg);
-        imagecopy($identicon, $corner, $this->spriteZ * 2, $this->spriteZ * 2, 0, 0, $this->spriteZ, $this->spriteZ);
-        $corner = imagerotate($corner, 90, $bg);
-        imagecopy($identicon, $corner, $this->spriteZ * 2, 0, 0, 0, $this->spriteZ, $this->spriteZ);
-
-        /* generate side sprites */
-        $side = $this->getSprite($ssh, $sfr, $sfg, $sfb, $sro);
-        imagecopy($identicon, $side, $this->spriteZ, 0, 0, 0, $this->spriteZ, $this->spriteZ);
-        $side = imagerotate($side, 90, $bg);
-        imagecopy($identicon, $side, 0, $this->spriteZ, 0, 0, $this->spriteZ, $this->spriteZ);
-        $side = imagerotate($side, 90, $bg);
-        imagecopy($identicon, $side, $this->spriteZ, $this->spriteZ * 2, 0, 0, $this->spriteZ, $this->spriteZ);
-        $side = imagerotate($side, 90, $bg);
-        imagecopy($identicon, $side, $this->spriteZ * 2, $this->spriteZ, 0, 0, $this->spriteZ, $this->spriteZ);
-
-        /* generate center sprite */
-        $center = $this->getCenter($xsh, $cfr, $cfg, $cfb, $sfr, $sfg, $sfb, $xbg);
-        imagecopy($identicon, $center, $this->spriteZ, $this->spriteZ, 0, 0, $this->spriteZ, $this->spriteZ);
-
-        /* make white transparent */
-        imagecolortransparent($identicon, $bg);
-
-        /* create blank image according to specified dimensions */
-        $resized = imagecreatetruecolor($this->size, $this->size);
-        imageantialias($resized, true);
-
-        /* assign white as background */
-        $bg = imagecolorallocate($resized, 255, 255, 255);
-        imagefilledrectangle($resized, 0, 0, $this->size, $this->size, $bg);
-
-        /* resize identicon according to specification */
-        imagecopyresampled($resized, $identicon, 0, 0, (imagesx($identicon) - $this->spriteZ * 3) / 2,
-            (imagesx($identicon) - $this->spriteZ * 3) / 2, $this->size,
-            $this->size, $this->spriteZ * 3, $this->spriteZ * 3);
-
-        /* make white transparent */
-        imagecolortransparent($resized, $bg);
-
-        /* and finally, send to standard output */
+        $resized = $this->generateIdenticon();
         header('Content-Type: image/png');
+        header('ETag: "' . $this->getHash() . '"');
         imagepng($resized);
     }
 
@@ -575,6 +510,83 @@ class Generator
         }
 
         return $sprite;
+    }
+
+    /**
+     * @return resource
+     */
+    private function generateIdenticon()
+    {
+        $csh = hexdec($this->hash[0]); // corner sprite shape
+        $ssh = hexdec($this->hash[1]); // side sprite shape
+        $xsh = hexdec($this->hash[2]) & 7; // center sprite shape
+
+        $cro = hexdec($this->hash[3]) & 3; // corner sprite rotation
+        $sro = hexdec($this->hash[4]) & 3; // side sprite rotation
+        $xbg = hexdec($this->hash[5]) % 2; // center sprite background
+
+        /* corner sprite foreground color */
+        $cfr = hexdec(substr($this->hash, 6, 2));
+        $cfg = hexdec(substr($this->hash, 8, 2));
+        $cfb = hexdec(substr($this->hash, 10, 2));
+
+        /* side sprite foreground color */
+        $sfr = hexdec(substr($this->hash, 12, 2));
+        $sfg = hexdec(substr($this->hash, 14, 2));
+        $sfb = hexdec(substr($this->hash, 16, 2));
+
+        /* start with blank 3x3 identicon */
+        $identicon = imagecreatetruecolor($this->spriteZ * 3, $this->spriteZ * 3);
+        imageantialias($identicon, true);
+
+        /* assign white as background */
+        $bg = imagecolorallocate($identicon, 255, 255, 255);
+        imagefilledrectangle($identicon, 0, 0, $this->spriteZ, $this->spriteZ, $bg);
+
+        /* generate corner sprites */
+        $corner = $this->getSprite($csh, $cfr, $cfg, $cfb, $cro);
+        imagecopy($identicon, $corner, 0, 0, 0, 0, $this->spriteZ, $this->spriteZ);
+        $corner = imagerotate($corner, 90, $bg);
+        imagecopy($identicon, $corner, 0, $this->spriteZ * 2, 0, 0, $this->spriteZ, $this->spriteZ);
+        $corner = imagerotate($corner, 90, $bg);
+        imagecopy($identicon, $corner, $this->spriteZ * 2, $this->spriteZ * 2, 0, 0, $this->spriteZ, $this->spriteZ);
+        $corner = imagerotate($corner, 90, $bg);
+        imagecopy($identicon, $corner, $this->spriteZ * 2, 0, 0, 0, $this->spriteZ, $this->spriteZ);
+
+        /* generate side sprites */
+        $side = $this->getSprite($ssh, $sfr, $sfg, $sfb, $sro);
+        imagecopy($identicon, $side, $this->spriteZ, 0, 0, 0, $this->spriteZ, $this->spriteZ);
+        $side = imagerotate($side, 90, $bg);
+        imagecopy($identicon, $side, 0, $this->spriteZ, 0, 0, $this->spriteZ, $this->spriteZ);
+        $side = imagerotate($side, 90, $bg);
+        imagecopy($identicon, $side, $this->spriteZ, $this->spriteZ * 2, 0, 0, $this->spriteZ, $this->spriteZ);
+        $side = imagerotate($side, 90, $bg);
+        imagecopy($identicon, $side, $this->spriteZ * 2, $this->spriteZ, 0, 0, $this->spriteZ, $this->spriteZ);
+
+        /* generate center sprite */
+        $center = $this->getCenter($xsh, $cfr, $cfg, $cfb, $sfr, $sfg, $sfb, $xbg);
+        imagecopy($identicon, $center, $this->spriteZ, $this->spriteZ, 0, 0, $this->spriteZ, $this->spriteZ);
+
+        /* make white transparent */
+        imagecolortransparent($identicon, $bg);
+
+        /* create blank image according to specified dimensions */
+        $resized = imagecreatetruecolor($this->size, $this->size);
+        imageantialias($resized, true);
+
+        /* assign white as background */
+        $bg = imagecolorallocate($resized, 255, 255, 255);
+        imagefilledrectangle($resized, 0, 0, $this->size, $this->size, $bg);
+
+        /* resize identicon according to specification */
+        imagecopyresampled($resized, $identicon, 0, 0, (imagesx($identicon) - $this->spriteZ * 3) / 2,
+            (imagesx($identicon) - $this->spriteZ * 3) / 2, $this->size,
+            $this->size, $this->spriteZ * 3, $this->spriteZ * 3);
+
+        /* make white transparent */
+        imagecolortransparent($resized, $bg);
+
+        return $resized;
     }
 
 }
