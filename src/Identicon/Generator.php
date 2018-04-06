@@ -50,9 +50,6 @@ class Generator
         $sfg = hexdec(substr($this->hash, 14, 2));
         $sfb = hexdec(substr($this->hash, 16, 2));
 
-        /* final angle of rotation */
-        $angle = hexdec(substr($this->hash, 18, 2));
-
         /* start with blank 3x3 identicon */
         $identicon = imagecreatetruecolor($this->spriteZ * 3, $this->spriteZ * 3);
         imageantialias($identicon, true);
@@ -84,8 +81,6 @@ class Generator
         /* generate center sprite */
         $center = $this->getCenter($xsh, $cfr, $cfg, $cfb, $sfr, $sfg, $sfb, $xbg);
         imagecopy($identicon, $center, $this->spriteZ, $this->spriteZ, 0, 0, $this->spriteZ, $this->spriteZ);
-
-// $identicon=imagerotate($identicon,$angle,$bg);
 
         /* make white transparent */
         imagecolortransparent($identicon, $bg);
